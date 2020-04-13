@@ -10,31 +10,42 @@ const server = http.createServer((req, res) => {
 
 const watcher = chokidar.watch('./'+process.env.WATCHDIR);
 
+console.log(watcher);
+
 watcher.on('add', async file => {
     console.log(__dirname + '/' +file);
     const fileSend = __dirname + '/' +file;
 
-    try {
+    if(file.substring(7,12) !== process.env.IGNOREDFOLDER){
 
-        const formData = {
-            file: fs.createReadStream(fileSend),
-            type: 'photobooth'
-        };
+        try {
 
-        request.post({url: process.env.URL, formData: formData}, (err, httpResponse, body) => {
-        if(err){
-            return console.log('Upload Failed :', err);
+            setTimeout(() => {
+                send(fileSend);
+            },5000);
+        
+        } catch (e) {
+            console.log(e);
         }
-        console.log('Upload successful ! Server responsed with: ', body);
-        });
-
     
-    } catch (e) {
-        console.log(e);
     }
-    
 
 });
+
+function send(fileSend) {
+    const formData = {
+        file: fs.createReadStream(fileSend),
+        type: 'photobooth'
+    };
+
+    request.post({url: process.env.URL, formData: formData}, (err, httpResponse, body) => {
+    if(err){
+        return console.log('Upload Failed :', err);
+    }
+    console.log('Upload successful ! Server responsed with: ', body);
+    });
+
+}
 
 
 server.listen(process.env.PORT, console.log('Server started'));
